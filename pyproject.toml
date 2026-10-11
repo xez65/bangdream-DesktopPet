@@ -1,0 +1,13 @@
+[project]
+name = "desktop-pet-feng"
+version = "0.1.0"
+description = "Windows desktop pet driven by pre-baked Live2D sequence frames (sakiko)"
+requires-python = ">=3.12"
+dependencies = ["PySide6-Essentials", "Pillow"]
+
+[project.optional-dependencies]
+dev = ["pytest", "pyinstaller"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

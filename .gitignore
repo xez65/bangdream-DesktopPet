@@ -1,0 +1,22 @@
+# virtualenv and build output
+.venv/
+build/
+dist/
+*.spec
+
+# local capture / measurement output (contains screen grabs of the author's desktop)
+dev/
+
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# editor and OS noise
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+
+# NOTE: assets/clips/ is committed on purpose. It is the 63 MB WebP frame pack the app
+# runs from; the 1024² sources it was baked from are not in this repository.

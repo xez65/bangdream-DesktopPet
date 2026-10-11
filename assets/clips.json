@@ -1,0 +1,221 @@
+{
+  "character": "sakiko",
+  "sourceIndexSha256": "f7d8f242a2defe460291876ec1eb6494a3329c4237cd05fd805be4a2e77a1938",
+  "sourceFramesRoot": "C:\\Users\\Administrator\\My project (2)\\凤川祥\\_bake\\out\\frames\\batch",
+  "internalHeight": 480,
+  "cropBox": [
+    219,
+    33,
+    818,
+    997
+  ],
+  "anchor": {
+    "ax": 148.88,
+    "ay": 476.02
+  },
+  "fps": 30,
+  "webp": {
+    "quality": 82,
+    "method": 4,
+    "alphaThreshold": 10,
+    "pad": 8
+  },
+  "pillow": "12.3.0",
+  "builderVersion": "1",
+  "frameTotal": 2166,
+  "bytesTotal": 66084806,
+  "clips": [
+    {
+      "slug": "sakiko_angry01",
+      "label": "不满",
+      "kind": "react_annoyed",
+      "loop_mode": "once",
+      "pools": [],
+      "frames": 125,
+      "fps": 30,
+      "bytes": 4182808
+    },
+    {
+      "slug": "sakiko_angry03",
+      "label": "生气",
+      "kind": "react_angry",
+      "loop_mode": "once",
+      "pools": [],
+      "frames": 130,
+      "fps": 30,
+      "bytes": 3952664
+    },
+    {
+      "slug": "sakiko_bye01",
+      "label": "打招呼",
+      "kind": "greet",
+      "loop_mode": "once",
+      "pools": [],
+      "frames": 127,
+      "fps": 30,
+      "bytes": 3814044
+    },
+    {
+      "slug": "sakiko_cry01",
+      "label": "哭",
+      "kind": "sad_low",
+      "loop_mode": "once",
+      "pools": [
+        "low"
+      ],
+      "frames": 115,
+      "fps": 30,
+      "bytes": 3442722
+    },
+    {
+      "slug": "sakiko_idle01",
+      "label": "待机",
+      "kind": "idle",
+      "loop_mode": "loop",
+      "pools": [
+        "idle"
+      ],
+      "frames": 210,
+      "fps": 30,
+      "bytes": 6289228
+    },
+    {
+      "slug": "sakiko_nf_left01",
+      "label": "向左移动",
+      "kind": "walk_left",
+      "loop_mode": "loop",
+      "pools": [
+        "walk"
+      ],
+      "frames": 125,
+      "fps": 30,
+      "bytes": 3662578
+    },
+    {
+      "slug": "sakiko_nf_right01",
+      "label": "向右移动",
+      "kind": "walk_right",
+      "loop_mode": "loop",
+      "pools": [
+        "walk"
+      ],
+      "frames": 114,
+      "fps": 30,
+      "bytes": 3323964
+    },
+    {
+      "slug": "sakiko_nod01",
+      "label": "点头接受",
+      "kind": "eat_yes",
+      "loop_mode": "once",
+      "pools": [
+        "small"
+      ],
+      "frames": 119,
+      "fps": 30,
+      "bytes": 3778680
+    },
+    {
+      "slug": "sakiko_odoodo01",
+      "label": "落地慌张",
+      "kind": "land",
+      "loop_mode": "once",
+      "pools": [
+        "small"
+      ],
+      "frames": 115,
+      "fps": 30,
+      "bytes": 3451290
+    },
+    {
+      "slug": "sakiko_sad01",
+      "label": "难过",
+      "kind": "hungry",
+      "loop_mode": "once",
+      "pools": [
+        "low"
+      ],
+      "frames": 110,
+      "fps": 30,
+      "bytes": 3311630
+    },
+    {
+      "slug": "sakiko_serious01",
+      "label": "认真",
+      "kind": "quiet_alt",
+      "loop_mode": "loop",
+      "pools": [
+        "small"
+      ],
+      "frames": 120,
+      "fps": 30,
+      "bytes": 3820884
+    },
+    {
+      "slug": "sakiko_shame01",
+      "label": "害羞",
+      "kind": "pet",
+      "loop_mode": "once",
+      "pools": [],
+      "frames": 123,
+      "fps": 30,
+      "bytes": 3786006
+    },
+    {
+      "slug": "sakiko_sigh01",
+      "label": "叹气",
+      "kind": "sedentary",
+      "loop_mode": "once",
+      "pools": [
+        "small"
+      ],
+      "frames": 139,
+      "fps": 30,
+      "bytes": 4176930
+    },
+    {
+      "slug": "sakiko_smile01",
+      "label": "被戳开心",
+      "kind": "react_poke",
+      "loop_mode": "once",
+      "pools": [],
+      "frames": 134,
+      "fps": 30,
+      "bytes": 4241866
+    },
+    {
+      "slug": "sakiko_smile03",
+      "label": "微笑",
+      "kind": "small",
+      "loop_mode": "once",
+      "pools": [
+        "small"
+      ],
+      "frames": 120,
+      "fps": 30,
+      "bytes": 3566824
+    },
+    {
+      "slug": "sakiko_surprised01",
+      "label": "被拎起",
+      "kind": "held",
+      "loop_mode": "loop",
+      "pools": [],
+      "frames": 110,
+      "fps": 30,
+      "bytes": 3312194
+    },
+    {
+      "slug": "sakiko_thinking01",
+      "label": "思考陪读",
+      "kind": "quiet",
+      "loop_mode": "loop",
+      "pools": [
+        "small"
+      ],
+      "frames": 130,
+      "fps": 30,
+      "bytes": 3970494
+    }
+  ]
+}
