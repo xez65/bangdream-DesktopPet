@@ -12,7 +12,7 @@ from dataclasses import replace
 from datetime import datetime
 
 from PySide6.QtCore import QPoint, QRectF, Qt, QTimer
-from PySide6.QtGui import QColor, QFont, QPainter, QPainterPath, QPixmap
+from PySide6.QtGui import QColor, QFont, QFontMetrics, QPainter, QPainterPath, QPixmap
 from PySide6.QtWidgets import QApplication, QMenu, QWidget
 from petapp import menu as menu_mod
 from petapp.frames import FrameStore
@@ -32,6 +32,7 @@ DRAG_THRESHOLD = 6
 CLICK_MAX_MS = 0.15
 DOUBLE_CLICK_WINDOW = 0.25
 BUBBLE_SPACE = 120
+BUBBLE_H = 26
 SCALE_PRESETS = (150, 220, 300)
 BUBBLE_SECONDS = 3.2
 STATS_TICK_SECONDS = 60.0
@@ -444,7 +445,7 @@ class PetWindow(QWidget):
         p.setFont(QFont("Microsoft YaHei", 9))
         fm = p.fontMetrics()
         w = min(self.width() - 4, fm.horizontalAdvance(self._bubble_text) + 18)
-        h = 26
+        h = BUBBLE_H
         x = max(2.0, (self.width() - w) / 2)
         y = max(0.0, self.height() - self.pet_h - h - 6)
         path = QPainterPath()
@@ -454,18 +455,66 @@ class PetWindow(QWidget):
         p.drawPath(path)
         p.drawText(QPoint(round(x + 9), round(y + h - 8)), self._bubble_text)
 
+    def _panel_metrics(self) -> tuple[int, int, int, QFont]:
+        """(pixel unit, row height, panel height, label font) for the stat panel.
+
+        The row band follows the font rather than the bar, because at the 150 px body size a
+        bar-only step clips the labels into the frame above them. The font is capped so the panel
+        stays inside the empty band above the head, which is also where the bubble lands.
+        """
+        px = max(2, round(self.pet_h / 220 * 3))
+        font = QFont("Microsoft YaHei", min(11, max(8, round(self.pet_h / 26))))
+        row_h = max(px * 5, QFontMetrics(font).height() + px)
+        return px, row_h, row_h * 3 + px, font
+
     def _paint_stat_bars(self, p: QPainter) -> None:
-        rows = (("\u9971\u98df", self.stats.satiety, QColor(240, 170, 90)),
-                ("\u5fc3\u60c5", self.stats.mood, QColor(235, 120, 150)),
-                ("\u4eb2\u5bc6", self.stats.affection, QColor(120, 175, 235)))
-        y = 4
-        p.setFont(QFont("Microsoft YaHei", 8))
-        for label, value, color in rows:
-            p.setPen(QColor(255, 255, 255, 200))
-            p.drawText(4, y + 10, label)
-            p.fillRect(QRectF(30, y + 2, self.width() - 40, 9), QColor(0, 0, 0, 90))
-            p.fillRect(QRectF(30, y + 2, (self.width() - 40) * max(0.0, min(1.0, value / 100)), 9), color)
-            y += 15
+        """Pixel panel: flat pastel blocks on an outlined light frame, no gradients.
+
+        Everything sits on a "pixel" grid that scales with the body size, and each row's name goes in
+        the empty left column rather than over the bar, so it stays readable against any wallpaper.
+        """
+        rows = (("\u9971\u98df", self.stats.satiety, QColor(255, 178, 92), QColor(255, 221, 170)),
+                ("\u5fc3\u60c5", self.stats.mood, QColor(255, 127, 168), QColor(255, 190, 212)),
+                ("\u4eb2\u5bc6", self.stats.affection, QColor(126, 178, 255), QColor(191, 217, 255)))
+        ink = QColor(43, 42, 74)                       # the panel's only dark value: outline + labels
+        paper = QColor(244, 241, 255, 226)
+        empty = QColor(217, 212, 232)
+        empty_foot = QColor(196, 190, 214)
+        px, row_h, panel_h, font = self._panel_metrics()
+        p.setFont(font)
+        fm = p.fontMetrics()
+        bar_h = px * 3
+        panel = QRectF(px, px, self.width() - px * 2, panel_h)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing, False)
+        p.fillRect(panel, paper)
+        p.setPen(ink)
+        p.setBrush(Qt.BrushStyle.NoBrush)
+        p.drawRect(panel)
+        for cx, cy in ((panel.left(), panel.top()), (panel.right() - 1, panel.top()),
+                       (panel.left(), panel.bottom() - 1), (panel.right() - 1, panel.bottom() - 1)):
+            p.fillRect(QRectF(cx, cy, 1, 1), paper)    # notched corners
+
+        p.setPen(ink)
+        label_col = max(fm.horizontalAdvance(row[0]) for row in rows) + px * 2
+        bar_x = panel.left() + px + label_col
+        segs = 8
+        seg_w = max(1.0, (panel.right() - px * 2 - bar_x - px * (segs - 1)) / segs)
+        for i, (label, value, fill, highlight) in enumerate(rows):
+            band = panel.top() + px + i * row_h
+            top = band + (row_h - bar_h) / 2
+            p.drawText(QRectF(panel.left() + px, band, label_col, row_h),
+                       int(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft), label)
+            filled = round(max(0.0, min(1.0, value / 100)) * segs)
+            for s in range(segs):
+                sx = bar_x + s * (seg_w + px)
+                if s < filled:
+                    p.fillRect(QRectF(sx, top, seg_w, bar_h), fill)
+                    p.fillRect(QRectF(sx, top, seg_w, px), highlight)
+                    p.fillRect(QRectF(sx, top + bar_h - px, seg_w, px), ink)
+                else:
+                    p.fillRect(QRectF(sx, top, seg_w, bar_h), empty)
+                    p.fillRect(QRectF(sx, top + bar_h - px, seg_w, px), empty_foot)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing, True)
 
 
 def QCursor_pos() -> QPoint:

@@ -21,8 +21,10 @@ import subprocess
 import sys
 import time
 
+from build_exe import SHIP_NAME          # one shipping name, shared with the packager
+
 PROJECT = pathlib.Path(__file__).resolve().parents[1]
-EXE = PROJECT / "dist" / "\u51e4\u5ddd\u7965\u6a21\u62df\u5668.exe"
+EXE = PROJECT / "dist" / f"{SHIP_NAME}.exe"
 RUN_SCRIPT = PROJECT / "run.py"
 
 

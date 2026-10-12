@@ -47,11 +47,17 @@ def test_ship_name_and_display_name_are_the_same_string():
     tools/build_exe.py only runs PyInstaller under __main__, so importing it here is side-effect free.
     """
     sys.path.insert(0, str(ROOT / "tools"))
+    import accept_shots
     import build_exe
+    import measure_perf
     from petapp.tray import APP_NAME
 
     assert build_exe.SHIP_NAME == APP_NAME, (build_exe.SHIP_NAME, APP_NAME)
     assert APP_NAME == "\u4e30\u5ddd\u7965\u5b50\u684c\u5ba0\u6a21\u62df\u5668", repr(APP_NAME)
+    # The two acceptance tools used to carry their own copy of the name and both went stale on
+    # 2026-10-12, which is how a capture run ended up driving the previous build.
+    assert accept_shots.EXE.name == build_exe.SHIP_NAME + ".exe", accept_shots.EXE
+    assert measure_perf.EXE_NAME == build_exe.SHIP_NAME + ".exe", measure_perf.EXE_NAME
 
 
 def test_python_runtime_is_inside_the_project_venv():

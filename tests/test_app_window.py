@@ -143,6 +143,25 @@ def test_menu_actions_change_state(qapp, win):
     qapp.processEvents()
 
 
+def test_stat_panel_clears_the_bubble_band(qapp, win):
+    """Panel and bubble share the empty band above the head, so they must never overlap.
+
+    Checked at every body size because both grow with it: the panel from the label font, the bubble
+    position from the frame height.
+    """
+    from PySide6.QtGui import QFontMetrics
+    from petapp.window import BUBBLE_H, BUBBLE_SPACE, SCALE_PRESETS
+
+    for index, height in enumerate(SCALE_PRESETS):
+        win.set_scale_index(index)
+        px, row_h, panel_h, font = win._panel_metrics()
+        assert win.height() == height + BUBBLE_SPACE, height
+        panel_bottom = px + panel_h
+        bubble_top = win.height() - win.pet_h - BUBBLE_H - 6
+        assert panel_bottom <= bubble_top, (height, panel_bottom, bubble_top)
+        assert row_h >= QFontMetrics(font).height(), height
+
+
 def test_click_through_toggle_does_not_raise(qapp, win):
     win.set_click_through_enabled(True)
     win.set_click_through_enabled(False)

@@ -18,6 +18,8 @@ import sys
 import time
 from ctypes import wintypes
 
+from build_exe import SHIP_NAME
+
 PROJECT = pathlib.Path(__file__).resolve().parents[1]
 PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
 PROCESS_QUERY_INFORMATION = 0x0400
@@ -91,7 +93,7 @@ def sample(pid: int, seconds: float, interval: float = 1.0) -> dict:
         round(x / 1048576, 1) for x in rss], "sampled_seconds": round(time.perf_counter() - t0, 1)}
 
 
-EXE_NAME = "\u51e4\u5ddd\u7965\u6a21\u62df\u5668.exe"     # built from code points, never argv
+EXE_NAME = f"{SHIP_NAME}.exe"            # shared with the packager, so a rename cannot miss a tool
 
 
 def main(argv=None) -> int:

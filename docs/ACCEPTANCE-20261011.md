@@ -162,3 +162,28 @@ U+6A21 U+62DF U+5668）。本文上面 10-11 那轮按当时事实保留，不�
 于是外部命令连得上却一个字节都收不到；而且 `taskkill /IM python.exe` 抓不到它们
 （进程名是中文 exe）。杀掉之后同样的探测立刻变成 `ServerNotFoundError`，通道才回到可判定状态。
 根目录那个旧名 exe（113,622,678 B，10-11 11:51 构建）仍在原地，未删。
+
+## 2026-10-12 追加三：数值面板改像素风，以及顺带挖出的两个坑
+
+面板本身（`PetWindow._paint_stat_bars`）：浅紫纸底 #f4f1ff（alpha 226）+ 1 像素深靛 #2b2a4a 描边、
+四角各抠一像素做切角；每条数值拆 8 段方块，填充段是"顶 1 像素高光 + 本色 + 底 1 像素深色收边"三层，
+空格段用 #d9d4e8 加 #c4bed6；名称「饱食 / 心情 / 亲密」移到左侧独立文字列，垂直居中对齐各自行。
+像素格 `px = max(2, round(pet_h/220*3))`，行高取 `max(px*5, QFontMetrics(font).height()+px)`，
+字号 `min(11, max(8, round(pet_h/26)))`。真实窗口平台实测：pet_h 150/220/300 时面板底边 55/60/80，
+气泡顶边恒为 88，几何不变量已进 `tests/test_app_window.py::test_stat_panel_clears_the_bubble_band`。
+
+坑一（我自己的改名漏项）：`tools/accept_shots.py` 和 `tools/measure_perf.py` 各自还硬编码着旧产物名
+`凤川祥模拟器.exe`，所以第一次 `--exe` 采集驱动的是 10-11 那个旧 exe，出图仍是旧面板。
+两处已改成从 `tools/build_exe.SHIP_NAME` 派生，并纳入 `tests/test_scaffold.py` 的同名钉死断言
+（现在断言覆盖 tray.APP_NAME、build_exe.SHIP_NAME、accept_shots.EXE、measure_perf.EXE_NAME 四处）。
+
+坑二（会让整批视觉证据作废的开关）：`%APPDATA%\DesktopPetSakiko\settings.json` 里
+`paused: true` 时 `PetWindow._on_tick` 只在首帧未解码时才走时间轴，于是 12 个场景全部停在
+`sakiko_idle01` 第 0 帧且图片哈希完全相同；同样的状态下右键选动作也没有任何可见变化。
+本轮采集改为把 `APPDATA` 指到临时目录再跑，不触碰用户存档；重跑后 12 张图哈希互不相同，
+`slug` 与场景请求的动作一一对应（02→smile01、03→angry01、04→thinking01、06→surprised01、08→shame01）。
+这条属于"暂停自主行动"的既有语义，不是缺陷；但用户如果看到桌宠一动不动，先查这个勾。
+
+产物与证据：`dist/丰川祥子桌宠模拟器.exe` 113,502,651 B，sha256 `2ff4d64165614e09…`，
+内嵌 `gitCommit c31cb08`；场景图在 `dev/shots-pixel/`（12 张 + `scenes_manifest.json` + `manifest.json`），
+公开仓 `docs/screenshots/` 的四张已换成这一轮。全套 `pytest -q` → 116 passed / 1 skipped。

@@ -25,7 +25,11 @@ background here but composites over your wallpaper when it is running.
   control back.
 - **Scroll wheel** cycles three body sizes: 150 / 220 / 300 px (default 220).
 - **Raising stats** — fullness, mood, affection, decaying on real elapsed time; four foods in the
-  feed menu with different effects; bars drawn above her head inside the same transparent window.
+  feed menu with different effects. The panel is a flat pixel-art HUD: a light lavender plate with a
+  1-pixel indigo outline and notched corners, each stat drawn as 8 chunky segments (highlight row,
+  body, dark foot), and the row names 饱食 / 心情 / 亲密 written in their own left column instead of
+  over the bars. It is painted by `PetWindow._paint_stat_bars` on a pixel grid that scales with the
+  body size, inside the same transparent window — no second top-level widget.
 - **Widgets** — hourly chime, sedentary reminder (reads `GetLastInputInfo`, so it stays quiet while
   you are typing), pomodoro (the pet goes into a quiet state instead of stealing focus from your work).
 - **Persistence** — `%APPDATA%\DesktopPetSakiko\`, saved on close and re-read on start; offline decay
