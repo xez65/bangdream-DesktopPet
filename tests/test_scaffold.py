@@ -42,6 +42,18 @@ def test_qt_available_offscreen():
     assert (QApplication.instance() or QApplication([])) is not None
 
 
+def test_ship_name_and_display_name_are_the_same_string():
+    """Two literals held the product name, and a half-applied rename shipped a stale exe once.
+    tools/build_exe.py only runs PyInstaller under __main__, so importing it here is side-effect free.
+    """
+    sys.path.insert(0, str(ROOT / "tools"))
+    import build_exe
+    from petapp.tray import APP_NAME
+
+    assert build_exe.SHIP_NAME == APP_NAME, (build_exe.SHIP_NAME, APP_NAME)
+    assert APP_NAME == "\u4e30\u5ddd\u7965\u5b50\u684c\u5ba0\u6a21\u62df\u5668", repr(APP_NAME)
+
+
 def test_python_runtime_is_inside_the_project_venv():
     exe = pathlib.Path(sys.executable).resolve()
     assert ROOT in exe.parents, exe

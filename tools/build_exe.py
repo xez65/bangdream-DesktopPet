@@ -22,8 +22,10 @@ ASSETS = PROJECT / "assets"
 DIST = PROJECT / "dist"
 BUILD = PROJECT / "build"
 ASCII_NAME = "DesktopPetSakiko"
-# 凤川祥模拟器. 祥 is U+7965, the same three code points FengFrameLibrary.cs:116-118 builds.
-SHIP_NAME = "\u51e4\u5ddd\u7965\u6a21\u62df\u5668"
+# 丰川祥子桌宠模拟器. 祥 is U+7965, as in FengFrameLibrary.cs:116-118; the first character is
+# 丰 U+4E30, not the 凤 U+51E4 that opens the bake folder name. tests/test_scaffold.py pins this
+# to petapp.tray.APP_NAME so a rename cannot half-land the way it did on 2026-10-11.
+SHIP_NAME = "\u4e30\u5ddd\u7965\u5b50\u684c\u5ba0\u6a21\u62df\u5668"
 
 EXCLUDES = (
     "PySide6.QtQuick", "PySide6.QtQuickWidgets", "PySide6.QtQml", "PySide6.QtNetworkAuth",

@@ -123,7 +123,7 @@ def main(argv=None) -> int:
 
     guard = InstanceGuard()
     if not guard.acquire():
-        print("another 凤川祥模拟器 is already running; this instance exits")
+        print(f"another {tray_mod.APP_NAME} is already running; this instance exits")
         return 0
     app.aboutToQuit.connect(guard.close)
     dev_mode = os.environ.get("DESKTOPPET_DEV") == "1"

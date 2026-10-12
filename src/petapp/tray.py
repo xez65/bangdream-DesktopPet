@@ -5,7 +5,8 @@ from __future__ import annotations
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QMenu, QSystemTrayIcon
 
-APP_NAME = "\u51e4\u5ddd\u7965\u6a21\u62df\u5668"   # 凤川祥模拟器 (祥 = U+7965)
+APP_NAME = "\u4e30\u5ddd\u7965\u5b50\u684c\u5ba0\u6a21\u62df\u5668"
+# 丰川祥子桌宠模拟器. Single source for the display name; build_exe.py's SHIP_NAME must match it.
 
 
 def build_tray(win, icon: QIcon | None = None) -> QSystemTrayIcon:

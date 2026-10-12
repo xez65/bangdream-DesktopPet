@@ -1,4 +1,4 @@
-# 凤川祥模拟器 · Windows Desktop Pet
+# 丰川祥子桌宠模拟器 · Windows Desktop Pet
 
 A Windows desktop pet rendered from **pre-baked Live2D sequence frames** — no Live2D runtime, no
 model SDK, just 2,166 WebP frames plus a small behaviour state machine. The character stands on the
@@ -30,8 +30,11 @@ background here but composites over your wallpaper when it is running.
   you are typing), pomodoro (the pet goes into a quiet state instead of stealing focus from your work).
 - **Persistence** — `%APPDATA%\DesktopPetSakiko\`, saved on close and re-read on start; offline decay
   is capped at 12 h; a corrupt save is renamed to `.bad-<timestamp>` instead of being overwritten.
-- **Single instance** via a `QLocalServer` named pipe, with recovery from a pipe left stale by a
-  killed process.
+- **Single instance** via a named kernel mutex (`Local\DesktopPetSakiko`), which the OS releases even
+  when the process is killed hard. The `QLocalServer` pipe under the same name is only the dev control
+  channel: `QLocalServer.listen()` is *not* an exclusivity test on Windows (measured on Qt 6.12, two
+  live processes both got `listen=True` for the same name and two pets came up), so ownership is never
+  decided by the pipe. `DESKTOPPET_GUARD_DEBUG=1` prints which side of each check a process took.
 - **System tray** — show/hide, click-through, quit. Click-through is set with `WS_EX_TRANSPARENT`
   through `ctypes` (Qt's own `WindowTransparentForInput` does not work on this window path), so while
   it is on the tray menu is the only way back.
@@ -68,7 +71,9 @@ renamed afterwards to `凤川祥模拟器.exe` and relaunched under that name to
 survives onefile extraction. `dist/BUILD_INFO.json` records size, sha256, frame count, the
 `clips.json` hash and the commit the build came from.
 
-On the build machine: **113,498,968 B**, exit code 0, 6.08 s start-to-exit.
+On the build machine, the current artifact: **113,500,786 B**, sha256 `8755c847db278ff3…`, exit code 0
+in 6.09 s start-to-exit from an empty `%TEMP%` directory with Python stripped from `PATH`
+(tick p95 inside that run: 7.73 ms).
 
 That is over GitHub's 100 MB per-file hard limit for commits, so the exe is not in this repo. Either
 build it locally with the command above (~40 s) or attach it to a GitHub Release, where the limit is
@@ -83,7 +88,8 @@ src/petapp/    Qt shell: window, frame decoding, bubble, menu, tray, store, Win3
 assets/        clips.json, text/lines.json, app.ico, clips/<slug>/NNN.webp  (all committed)
 tools/         build_clips.py, make_icon.py, build_exe.py, accept_shots.py, measure_perf.py
 docs/          ACCEPTANCE-20261011.md (measured gate table) and screenshots/
-tests/         113 items across petcore, the Qt shell and the shipped frame pack
+tests/         116 items: petcore units, the Qt shell offscreen, the shipped frame pack, and the
+               single-instance guard across two real interpreters
 ```
 
 ## The frame pack
@@ -106,12 +112,12 @@ gaps, every frame inside the crop box, the idle-loop seam, the byte budget. The 
 
 | run | result |
 |---|---|
-| `pytest -q` where the 1024² originals are reachable | 109 passed, 4 skipped |
-| `pytest -q` in a scratch copy with `sourceFramesRoot` pointed at a missing path | 106 passed, 7 skipped |
+| `pytest -q` where the 1024² originals are reachable | 112 passed, 4 skipped |
+| `pytest -q` in a scratch copy with `sourceFramesRoot` pointed at a missing path | 109 passed, 7 skipped |
 
 The second row was rehearsed by driving a scratch copy with another project's interpreter, so that run
-*also* failed `test_scaffold.py`'s "interpreter must be inside this project's `.venv`" guard; in a real
-clone the guard passes, hence 106 rather than the 105 observed.
+*also* deselected `test_scaffold.py`'s "interpreter must be inside this project's `.venv`" guard; in a
+real clone the guard passes, hence 109 rather than the 108 observed.
 
 The four standing skips in row one are the wall-clock tick gate plus three `test_clips.py` checks that
 compare the manifest against `unity_index.json`, which lives with the bake pipeline rather than here;

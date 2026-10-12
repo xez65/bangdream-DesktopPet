@@ -114,3 +114,51 @@ cd DesktopPet
 （观测到 `sakiko_idle01` 与 `sakiko_nod01`）；`quit` 退出码 0。
 回归测试 7 项（钉住保持、一次性回落、提醒后回钉、戳解除、恢复自主、拎起不复活钉住、
 走路钉住不产生位移）并入 `tests/test_behavior.py`，全套 113 项通过。
+
+## 2026-10-12 追加一：更名
+
+用户把产品中文名定为「丰川祥子桌宠模拟器」（U+4E30 U+5DDD U+7965 U+5B50 U+684C U+5BA0
+U+6A21 U+62DF U+5668）。本文上面 10-11 那轮按当时事实保留，不回改。
+
+- 改动落在 `tray.APP_NAME`（显示名的唯一出处，托盘 tooltip 用它）、`build_exe.SHIP_NAME`
+  和二次启动提示；`tests/test_scaffold.py` 新增一笔把前两处字面量钉成同一串码点，
+  因为 10-11 那次码点写错已经留下过两个陈旧 exe。
+- 内部标识不变：`setApplicationName`、`APP_DIRNAME`、`SERVER_NAME` 仍是 `DesktopPetSakiko`，
+  所以 `%APPDATA%\DesktopPetSakiko\` 的存档和命名管道沿用，改名不会让老档变成"第一次运行"。
+- 烘培目录名首字是 凤（U+51E4），角色名首字是 丰（U+4E30），两者不同，路径引用不要一起改。
+
+## 2026-10-12 追加二：单实例是真缺陷，判据换成内核互斥量
+
+现象：同一次登录里可以同时站起来两只桌宠，第二只照旧 show()，没有任何"已有实例"提示。
+
+根因是实测出来的：`QLocalServer.listen()` 在 Windows 上不是独占判据。两个活进程用同一个名字
+调 `listen()`，两边都返回 True、各自持有一个可用 server，谁也没看见谁；10-11 那版
+"探测管道失败就 removeServer 再监听"的写法因此反而让第二个进程理直气壮地当主实例。
+
+- `src/petapp/win32.py` 加 `acquire_named_mutex()`：`CreateMutexW` + `Local\` 前缀（会话内可见），
+  `GetLastError` 用 `ctypes.WinDLL(..., use_last_error=True)` 读，避免被中间 ctypes 调用污染；
+  `ERROR_ALREADY_EXISTS(183)` 判已被占。互斥量随进程由内核释放，硬杀不留尸体。
+- `src/petapp/instance.py`：所有权只由互斥量决定，拿到以后才 `removeServer` + `listen`，
+  管道退化为 dev 控制通道。删掉 liveness ping/pong 探测（实测真实应用里 `connected=1` 却收不到回）。
+- 新增 `tests/test_instance_guard.py` + `tests/guard_child.py`（子进程是真解释器，可硬杀）：
+  持有者活着 → 第二个进程 `acquire()` 必须 False 且不拥有 server/mutex；
+  持有者被硬杀 → 下一个进程必须能拿到（管道方案做不到这条，因为尸体还占着名字）。
+- 诊断口子 `DESKTOPPET_GUARD_DEBUG=1` 打印 GUARD/CHANNEL 两类分支，管道归属在进程列表里本来看不见。
+
+打包 exe 的真机验证（`dist/丰川祥子桌宠模拟器.exe`，113,500,786 B，sha256 `8755c847db278ff3…`，
+内嵌 `gitCommit f9eeb58`，`DESKTOPPET_DEV=1`）：
+
+- 首实例控制通道回读 `pid` → `OK pid 10604 parent 8948`，`current` →
+  `OK current sakiko_idle01 frame=0 state=idle pinned=False`
+- 第二次启动：14 s 后退出码 0，首实例仍在运行，再问 `pid` 还是同一个 10604 ⇒ 没有第二只
+- `quit` 之后首实例退出码 0
+- 冷启动口径与 10-11 相同（`%TEMP%` 空目录、PATH 剔除 Python）：`--once` 退出码 0，全程 6.09 s，
+  ticks=51 p95=7.73 ms，cache misses=50 evictions=0 failed_keys=0；首帧耗时依旧未埋点
+
+本轮全套 `pytest -q` → 115 passed / 1 skipped（tick 门只在 `DESKTOPPET_PERF=1` 时生效）。
+
+排查陷阱（记下来免得下次误判成代码坏了）：`DesktopPet/` 根目录留着上一轮验证起的两个
+`凤川祥模拟器.exe` 进程，它们占着 `DesktopPetSakiko` 管道名但不带 `DESKTOPPET_DEV`，
+于是外部命令连得上却一个字节都收不到；而且 `taskkill /IM python.exe` 抓不到它们
+（进程名是中文 exe）。杀掉之后同样的探测立刻变成 `ServerNotFoundError`，通道才回到可判定状态。
+根目录那个旧名 exe（113,622,678 B，10-11 11:51 构建）仍在原地，未删。
